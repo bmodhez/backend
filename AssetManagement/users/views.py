@@ -8,17 +8,13 @@ from .models import User, LoginHistory
 from .serializers import RegisterSerializer
 
 
-# -------------------------------
-#  Helper: Get Client IP
-# -------------------------------
+
 def get_ip(request):
     x = request.META.get("HTTP_X_FORWARDED_FOR")
     return x.split(",")[0] if x else request.META.get("REMOTE_ADDR")
 
 
-# -------------------------------
-#  REGISTER USER
-# -------------------------------
+#User Registration
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
@@ -28,7 +24,7 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        # Log registration
+        # Log 
         LoginHistory.objects.create(
             user=user,
             email=user.email,

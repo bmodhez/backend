@@ -51,7 +51,7 @@ export default {
     async login() {
       this.error = "";
       
-      // Basic validation
+      
       if (!this.email || !this.password) {
         this.error = "Please fill in all fields";
         return;
@@ -75,31 +75,16 @@ export default {
         this.$router.push({ name: "AdminDash" });
 
       } catch (err) {
-        console.error("Login error:", err);
-        
-        // Check if it's a network error
-        if (err.code === 'ERR_NETWORK' || err.message === 'Network Error' || !err.response) {
-          this.error = "Network Error: Backend server is not reachable";
-          return;
-        }
-        
-        // Extract error message from response
-        if (err.response && err.response.data) {
-          const errorData = err.response.data;
-          
-          if (typeof errorData === 'object' && errorData.detail) {
-            this.error = errorData.detail;
-          } else if (typeof errorData === 'string') {
-            this.error = errorData;
-          } else {
-            this.error = "Invalid email or password. Please try again.";
-          }
-        } else if (err.message) {
-          this.error = err.message;
-        } else {
-          this.error = "Login failed. Please try again.";
-        }
-      }
+  console.error("Login error:", err);
+
+  if (err.code === 'ERR_NETWORK' || !err.response) {
+    this.error = "Network Error: Backend server is not reachable";
+    return;
+  }
+
+  this.error = "Invalid email or password";
+}
+
     }
   },
 };
