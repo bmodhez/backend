@@ -62,3 +62,4 @@ class LoginHistory(models.Model):
     def __str__(self):
         status = "Success" if self.success else "Failed"
         return f"{self.email} - {status} - {self.login_time}"
+
