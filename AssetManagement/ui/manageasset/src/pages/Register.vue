@@ -47,57 +47,26 @@ export default {
   methods: {
     async register() {
       this.error = "";
-      
-      // Basic validation
+
+      // Validation
       if (!this.name || !this.email || !this.password) {
         this.error = "Please fill in all fields";
         return;
       }
 
       try {
-        const response = await api.post("/users/register/", {
+        // API call
+        await api.post("/users/register/", {
           name: this.name,
           email: this.email,
           password: this.password
         });
 
-        alert("Account created successfully!");
+        // 🔥 SUCCESS → Redirect to Admin Dashboard
         this.$router.push({ name: "AdminDash" });
 
       } catch (err) {
-        console.error("Registration error:", err);
-        
-        // Check if it's a network error (backend not reachable)
-        if (err.code === 'ERR_NETWORK' || err.message === 'Network Error' || !err.response) {
-          this.error = "Network Error: Backend server is not reachable. Please make sure the backend is running on http://localhost:8000";
-          return;
-        }
-        
-        // Extract error message from response
-        if (err.response && err.response.data) {
-          const errorData = err.response.data;
-          
-          // Handle field-specific errors
-          if (typeof errorData === 'object') {
-            const errorMessages = [];
-            for (const [field, messages] of Object.entries(errorData)) {
-              if (Array.isArray(messages)) {
-                errorMessages.push(`${field}: ${messages.join(', ')}`);
-              } else {
-                errorMessages.push(`${field}: ${messages}`);
-              }
-            }
-            this.error = errorMessages.join(' | ') || "Account creation failed";
-          } else if (typeof errorData === 'string') {
-            this.error = errorData;
-          } else {
-            this.error = "Account creation failed. Please check your input.";
-          }
-        } else if (err.message) {
-          this.error = err.message;
-        } else {
-          this.error = "Account creation failed. Please try again.";
-        }
+        this.error = err.response?.data?.detail || "Registration failed.";
       }
     }
   }
