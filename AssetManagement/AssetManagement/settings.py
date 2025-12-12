@@ -6,12 +6,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
 
-# Detect if running inside Docker
+
 IS_DOCKER = os.environ.get("IS_DOCKER", "false").lower() == "true"
 
 AUTH_USER_MODEL = "users.User"
 
-# SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = 'django-insecure-n=(yk28=7@d#k0^t%ajo8z6xm7aj0@szp007eu6(6^c%9(vdup'
 
 DEBUG = True
@@ -67,9 +67,9 @@ WSGI_APPLICATION = 'AssetManagement.wsgi.application'
 
 
 if IS_DOCKER:
-    DB_HOST = os.environ.get("DB_HOST", "db")       # Docker service name
+    DB_HOST = os.environ.get("DB_HOST", "db")       
 else:
-    DB_HOST = os.environ.get("DB_HOST", "localhost")  # Local system
+    DB_HOST = os.environ.get("DB_HOST", "localhost")  
 
 DATABASES = {
     'default': {
@@ -83,7 +83,8 @@ DATABASES = {
 }
 
 
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 LANGUAGE_CODE = 'en-us'
@@ -96,8 +97,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
 ]
 
 CORS_ALLOW_CREDENTIALS = True

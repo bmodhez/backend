@@ -1,12 +1,11 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
 from django.utils import timezone
-from .models import User, LoginHistory
-from .serializers import RegisterSerializer
 
+from .models import User, LoginHistory
+from .serializers import RegisterSerializer, CustomTokenSerializer   # ✅ IMPORTANT
 
 
 def get_ip(request):
@@ -14,7 +13,9 @@ def get_ip(request):
     return x.split(",")[0] if x else request.META.get("REMOTE_ADDR")
 
 
-#User Registration
+# -----------------------------------------
+# USER REGISTRATION
+# -----------------------------------------
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
@@ -24,7 +25,6 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        # Log 
         LoginHistory.objects.create(
             user=user,
             email=user.email,
@@ -41,8 +41,11 @@ class RegisterView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
+# -----------------------------------------
+# CUSTOM LOGIN (JWT RESPONSE + STAFF FLAG)
+# -----------------------------------------
 class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = TokenObtainPairSerializer
+    serializer_class = CustomTokenSerializer   # ✅ FIXED
 
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
@@ -52,15 +55,19 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         ip = get_ip(request)
         user_agent = request.META.get("HTTP_USER_AGENT", "")
 
+        # SUCCESS LOGIN
         if user:
             LoginHistory.objects.create(
-                user=user, email=email,
-                ip_address=ip, user_agent=user_agent,
+                user=user,
+                email=email,
+                ip_address=ip,
+                user_agent=user_agent,
                 success=True
             )
+
             return super().post(request, *args, **kwargs)
 
-  #If user failed to logn
+        # FAILED LOGIN
         failure = "Invalid password"
         user_obj = User.objects.filter(email=email).first()
 

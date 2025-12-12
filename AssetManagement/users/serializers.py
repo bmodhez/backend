@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import User
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -10,3 +11,30 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
+
+
+# 🔥 Custom JWT Token Serializer (sending user info)
+class CustomTokenSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token["email"] = user.email
+        token["name"] = user.name
+        token["is_staff"] = user.is_staff
+
+        return token
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Include user info in response too
+        data["user"] = {
+            "email": self.user.email,
+            "name": self.user.name,
+            "is_staff": self.user.is_staff,
+        }
+
+        return data

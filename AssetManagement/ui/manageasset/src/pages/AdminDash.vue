@@ -4,10 +4,14 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <h2 class="logo">Dashboard</h2>
+
       <button class="asset-btn">📦 Assets</button>
+
+      <!-- LOGOUT BUTTON -->
+      <button class="logout-btn" @click="logout">🚪 Logout</button>
     </aside>
 
-    <!-- MAIN AREA -->
+    <!-- MAIN CONTENT -->
     <main class="content">
 
       <div class="top-bar">
@@ -15,7 +19,6 @@
         <button class="add-btn" @click="startAdd">+ Add Asset</button>
       </div>
 
-      <!-- ✅ TABLE HEADER -->
       <div class="table-header">
         <span>Image</span>
         <span>Name</span>
@@ -25,14 +28,8 @@
         <span>Action</span>
       </div>
 
-      <!-- ✅ ASSET ROWS -->
-      <div 
-        class="table-row"
-        v-for="asset in assets"
-        :key="asset.id"
-      >
-        <img :src="asset.image" class="row-img"/>
-
+      <div class="table-row" v-for="asset in assets" :key="asset.id">
+        <img :src="asset.image" class="row-img" />
         <span>{{ asset.name }}</span>
         <span>{{ asset.description }}</span>
         <span>₹{{ asset.price }}</span>
@@ -44,32 +41,25 @@
         </div>
       </div>
 
-      <!-- ✅ MODAL -->
+      <!-- MODAL -->
       <div class="modal" v-if="showModal">
         <div class="modal-box">
 
           <h2>{{ selectedId ? "Edit Asset" : "Add Asset" }}</h2>
 
-          <input v-model="form.name" placeholder="Name"/>
-          <input v-model="form.desc" placeholder="Description"/>
-          <input v-model="form.price" type="number" placeholder="Price"/>
-          <input v-model="form.stock" type="number" placeholder="Stock"/>
-          <input v-model="form.image" placeholder="Image URL (https://...jpg/png)"/>
+          <input v-model="form.name" placeholder="Name" />
+          <input v-model="form.description" placeholder="Description" />
+          <input v-model="form.price" type="number" placeholder="Price" />
+          <input v-model="form.stock" type="number" placeholder="Stock" />
+
+          <!-- FILE UPLOAD -->
+          <input type="file" @change="handleImageUpload" />
 
           <div class="modal-actions">
-            <button class="cancel" @click="showModal=false">Cancel</button>
+            <button class="cancel" @click="showModal = false">Cancel</button>
 
-            <button 
-              v-if="selectedId" 
-              class="save" 
-              @click="updateAsset"
-            >Update</button>
-
-            <button 
-              v-else 
-              class="save" 
-              @click="addAsset"
-            >Add</button>
+            <button v-if="selectedId" class="save" @click="updateAsset">Update</button>
+            <button v-else class="save" @click="addAsset">Add</button>
           </div>
 
         </div>
@@ -78,6 +68,8 @@
     </main>
   </div>
 </template>
+
+
 <script>
 import { api } from "../api";
 
@@ -90,10 +82,10 @@ export default {
 
       form: {
         name: "",
-        desc: "",     // ✅ BACKEND KE SATH MATCH
+        description: "",
         price: "",
         stock: "",
-        image: ""
+        image: null
       }
     };
   },
@@ -103,6 +95,17 @@ export default {
   },
 
   methods: {
+
+    logout() {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      this.$router.push("/login");
+    },
+
+    handleImageUpload(event) {
+      this.form.image = event.target.files[0];
+    },
+
     async fetchAssets() {
       const res = await api.get("assets/");
       this.assets = res.data;
@@ -112,49 +115,55 @@ export default {
       this.selectedId = null;
       this.form = {
         name: "",
-        desc: "",
+        description: "",
         price: "",
         stock: "",
-        image: ""
+        image: null
       };
       this.showModal = true;
     },
 
     openEdit(asset) {
       this.selectedId = asset.id;
-      this.form = { ...asset };
+      this.form = { ...asset, image: null };
       this.showModal = true;
     },
 
-    async updateAsset() {
-      try {
-        await api.put(`assets/${this.selectedId}/`, this.form);
-        await this.fetchAssets();
-        this.showModal = false;
-      } catch (err) {
-        alert("Update Failed");
-        console.error(err);
-      }
+    async addAsset() {
+      const fd = new FormData();
+      fd.append("name", this.form.name);
+      fd.append("description", this.form.description);
+      fd.append("price", this.form.price);
+      fd.append("stock", this.form.stock);
+      fd.append("image", this.form.image);
+      console.log(fd,"Hello")
+
+      await api.post("assets/", fd, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      this.fetchAssets();
+      this.showModal = false;
     },
 
-    async addAsset() {
-  try {
-    await api.post("assets/", {
-      name: this.form.name,
-      desc: this.form.desc,
-      price: this.form.price,
-      stock: this.form.stock,
-      image: this.form.image   // ✅ URL ONLY
-    });
+    async updateAsset() {
+      const fd = new FormData();
+      fd.append("name", this.form.name);
+      fd.append("description", this.form.description);
+      fd.append("price", this.form.price);
+      fd.append("stock", this.form.stock);
 
-    await this.fetchAssets();
-    this.showModal = false;
+      if (this.form.image instanceof File) {
+        fd.append("image", this.form.image);
+      }
 
-  } catch (err) {
-    console.error("ADD ERROR:", err.response?.data || err);
-    alert("Add Failed - Check Image URL & Fields");
-  }
-},
+      await api.put(`assets/${this.selectedId}/`, fd, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      this.fetchAssets();
+      this.showModal = false;
+    },
 
     async deleteAsset(id) {
       await api.delete(`assets/${id}/`);
@@ -164,152 +173,60 @@ export default {
 };
 </script>
 
-
-
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
-.dashboard {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-}
+html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: #f4f4f4; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-.sidebar {
-  width: 260px;
-  background: #1d1f27;
-  color: white;
-  padding: 20px;
-}
+.dashboard { display: flex; height: 100vh; width: 100vw; }
 
-.logo {
-  font-size: 22px;
-  margin-bottom: 20px;
-}
+.sidebar { width: 260px; background: #1d1f27; color: white; padding: 20px; }
 
-.asset-btn {
+.logo { font-size: 22px; margin-bottom: 20px; }
+
+.asset-btn { width: 100%; padding: 12px; background: #ffc82e; border: none; border-radius: 6px; font-weight: bold; }
+
+.logout-btn {
   width: 100%;
+  margin-top: 20px;
   padding: 12px;
-  background: #ffc82e;
+  background: #e63946;
+  color: white;
   border: none;
   border-radius: 6px;
   font-weight: bold;
+  cursor: pointer;
 }
 
-.content {
-  flex: 1;
-  padding: 25px;
-  background: #f4f4f4;
-  overflow-y: auto;
+.logout-btn:hover { background: #d62828; }
+
+.content { flex: 1; margin-left: 260px; padding: 30px; background: #f4f4f4; overflow-y: auto; }
+
+.top-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+
+.add-btn { background: green; color: white; padding: 10px 15px; border-radius: 6px; border: none; }
+
+.table-header, .table-row {
+  width: 100%; display: grid; grid-template-columns: 120px 1fr 2fr 120px 100px 120px;
+  padding: 12px; border-radius: 6px; margin-bottom: 10px;
 }
 
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
+.table-header { background: #333; color: white; font-weight: bold; }
+.table-row { background: white; }
 
-.add-btn {
-  background: green;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 6px;
-}
+.row-img { width: 90px; height: 70px; object-fit: cover; border-radius: 6px; }
+.stock { color: green; font-weight: bold; }
 
-/* ✅ TABLE HEADER */
-.table-header {
-  display: grid;
-  grid-template-columns: 100px 1fr 2fr 120px 100px 120px;
-  background: #333;
-  color: white;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 10px;
-  font-weight: bold;
-}
+.row-actions { display: flex; gap: 10px; }
+.edit { background: orange; padding: 6px 10px; border: none; border-radius: 4px; }
+.delete { background: crimson; color: white; padding: 6px 10px; border: none; border-radius: 4px; }
 
-/* ✅ TABLE ROW */
-.table-row {
-  display: grid;
-  grid-template-columns: 100px 1fr 2fr 120px 100px 120px;
-  align-items: center;
-  background: white;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-}
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: grid; place-items: center; }
 
-.row-img {
-  width: 80px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 6px;
-}
+.modal-box { width: 300px; background: white; padding: 20px; border-radius: 8px; }
+.modal-box input { width: 100%; padding: 10px; margin-bottom: 10px; }
 
-.stock {
-  color: green;
-  font-weight: bold;
-}
-
-.row-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.edit {
-  background: orange;
-  border: none;
-  padding: 6px 10px;
-}
-
-.delete {
-  background: crimson;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-}
-
-/* ✅ MODAL */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: grid;
-  place-items: center;
-}
-
-.modal-box {
-  background: white;
-  padding: 25px;
-  width: 320px;
-  border-radius: 8px;
-}
-
-.modal-box input {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.save {
-  background: green;
-  color: white;
-  padding: 8px 14px;
-  border: none;
-}
-
-.cancel {
-  padding: 8px 14px;
-}
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.save { background: green; color: white; padding: 8px 14px; border: none; }
+.cancel { padding: 8px 14px; }
 </style>
