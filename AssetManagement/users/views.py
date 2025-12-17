@@ -2,11 +2,13 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+from .serializers import UserMiniSerializer
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from .models import User, LoginHistory
-from .serializers import RegisterSerializer, CustomTokenSerializer   # ✅ IMPORTANT
-
+from .serializers import RegisterSerializer, CustomTokenSerializer   
 
 def get_ip(request):
     x = request.META.get("HTTP_X_FORWARDED_FOR")
@@ -45,7 +47,7 @@ class RegisterView(generics.CreateAPIView):
 # CUSTOM LOGIN (JWT RESPONSE + STAFF FLAG)
 # -----------------------------------------
 class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenSerializer   # ✅ FIXED
+    serializer_class = CustomTokenSerializer   
 
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
@@ -67,7 +69,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
             return super().post(request, *args, **kwargs)
 
-        # FAILED LOGIN
         failure = "Invalid password"
         user_obj = User.objects.filter(email=email).first()
 
@@ -87,3 +88,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             {"detail": "Invalid email or password"},
             status=status.HTTP_401_UNAUTHORIZED
         )
+
+class UserListViewSet(ReadOnlyModelViewSet):
+    queryset = User.objects.filter(is_active=True)
+    serializer_class = UserMiniSerializer
+    permission_classes = [IsAuthenticated]

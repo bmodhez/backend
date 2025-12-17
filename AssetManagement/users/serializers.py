@@ -13,14 +13,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 
-# 🔥 Custom JWT Token Serializer (sending user info)
+# Custom JWT Token Serializer (sending user info)
 class CustomTokenSerializer(TokenObtainPairSerializer):
 
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
 
-        # Add custom claims
         token["email"] = user.email
         token["name"] = user.name
         token["is_staff"] = user.is_staff
@@ -30,7 +29,7 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
 
-        # Include user info in response too
+
         data["user"] = {
             "email": self.user.email,
             "name": self.user.name,
@@ -38,3 +37,8 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
         }
 
         return data
+
+class UserMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "email", "name")
