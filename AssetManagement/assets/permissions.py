@@ -1,10 +1,6 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 class IsStaffOrReadOnly(BasePermission):
-    """
-    Read: any authenticated user
-    Write: staff users only
-    """
 
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:

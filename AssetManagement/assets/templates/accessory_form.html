@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Accessory{% endblock %}
+
+{% block content %}
+<h1>{% if accessory %}Edit{% else %}Create{% endif %} Accessory</h1>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <label>Name</label><br>
+  <input name="name"
+         value="{{ accessory.name|default:'' }}" required><br><br>
+
+  <label>Category</label><br>
+  <input name="category"
+         value="{{ accessory.category|default:'' }}" required><br><br>
+
+  <label>Model No</label><br>
+  <input name="model_no"
+         value="{{ accessory.model_no|default:'' }}"><br><br>
+
+  <label>Location</label><br>
+  <input name="location"
+         value="{{ accessory.location|default:'' }}" required><br><br>
+
+  <label>Min Quantity</label><br>
+  <input type="number" name="min_quantity"
+         value="{{ accessory.min_quantity|default:0 }}"><br><br>
+
+  <label>Total Quantity</label><br>
+  <input type="number" name="quantity"
+         value="{{ accessory.quantity|default:'' }}" required><br><br>
+
+  <label>Device Image</label><br>
+  <input type="file" name="device_image"><br><br>
+
+  <button type="submit">💾 Save</button>
+  <a href="{% url 'accessory_list' %}">Cancel</a>
+</form>
+{% endblock %}

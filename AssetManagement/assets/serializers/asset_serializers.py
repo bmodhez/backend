@@ -16,10 +16,16 @@ class AssignedUserMiniSerializer(serializers.ModelSerializer):
 
 class AssetSerializer(serializers.ModelSerializer):
 
-    test = serializers.SerializerMethodField()
+    assigned_to = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        allow_null=True,
+        required=False
+    )
 
-    def get_test(self, obj):
-        return "Hi"
+    assigned_to_detail = AssignedUserMiniSerializer(
+        source="assigned_to",
+        read_only=True
+    )
 
     class Meta:
         model = Asset

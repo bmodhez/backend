@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Assets{% endblock %}
+
+{% block content %}
+<h1>Assets</h1>
+
+<a class="btn btn-add" href="{% url 'asset_create' %}">➕ Add Asset</a>
+<br><br>
+
+<table>
+  <tr>
+    <th>Image</th>
+    <th>Name</th>
+    <th>Asset Tag</th>
+    <th>Category</th>
+    <th>Status</th>
+    <th>Checked Out To</th>
+    <th>Location</th>
+    <th>Action</th>
+  </tr>
+
+  {% for a in assets %}
+  <tr>
+ 
+    <td>
+      {% if a.image %}
+        <img src="{{ a.image.url }}" class="asset-img">
+      {% else %}
+        —
+      {% endif %}
+    </td>
+
+    <td>{{ a.name }}</td>
+    <td>{{ a.asset_tag }}</td>
+    <td>{{ a.category }}</td>
+
+
+    <td>
+      {% if a.status == "ready" %}
+        🟢 Ready
+      {% elif a.status == "deployed" %}
+        🔵 Deployed
+      {% else %}
+        ⚫ Archived
+      {% endif %}
+    </td>
+
+    <td>
+      {% if a.assigned_to %}
+        {{ a.assigned_to.get_full_name|default:a.assigned_to.username }}
+      {% else %}
+        —
+      {% endif %}
+    </td>
+
+    <td>{{ a.location }}</td>
+
+    <td>
+      <a class="btn btn-edit" href="{% url 'asset_edit' a.id %}">✏️ Edit</a>
+      |
+      <form action="{% url 'asset_delete' a.id %}"
+            method="post"
+            style="display:inline;">
+        {% csrf_token %}
+        <button type="submit"
+                class="btn btn-delete"
+                onclick="return confirm('Delete this asset?')"
+                style="background:none; border:none; cursor:pointer;">
+          🗑️ Delete
+        </button>
+      </form>
+    </td>
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="8">No assets found</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

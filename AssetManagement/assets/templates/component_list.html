@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Components{% endblock %}
+
+{% block content %}
+<h1>Components</h1>
+
+<a class="btn btn-add" href="{% url 'component_create' %}">➕ Add Component</a>
+<br><br>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Serial</th>
+    <th>Category</th>
+    <th>Model No</th>
+    <th>Location</th>
+    <th>Min Qty</th>
+    <th>Total</th>
+    <th>Unit Cost</th>
+    <th>Action</th>
+  </tr>
+
+  {% for c in components %}
+  <tr>
+    <td>{{ c.name }}</td>
+    <td>{{ c.serial|default:"—" }}</td>
+    <td>{{ c.category }}</td>
+    <td>{{ c.model_no|default:"—" }}</td>
+    <td>{{ c.location }}</td>
+
+    <td>{{ c.min_quantity }}</td>
+
+    <td>
+      {% if c.quantity > c.min_quantity %}
+        🟢 {{ c.quantity }}
+      {% else %}
+        🔴 {{ c.quantity }}
+      {% endif %}
+    </td>
+
+    <td>{{ c.unit_cost|default:"—" }}</td>
+
+    <td>
+      <a class="btn btn-edit" href="{% url 'component_edit' c.id %}">
+        ✏️ Edit
+      </a>
+      |
+      <form action="{% url 'component_delete' c.id %}"
+            method="post"
+            style="display:inline;">
+        {% csrf_token %}
+        <button type="submit"
+                class="btn btn-delete"
+                onclick="return confirm('Delete this component?')"
+                style="background:none;border:none;cursor:pointer;">
+          🗑️ Delete
+        </button>
+      </form>
+    </td>
+  </tr>
+
+  {% empty %}
+  <tr>
+    <td colspan="9" style="text-align:center;">
+      No components found
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

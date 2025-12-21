@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Licenses{% endblock %}
+
+{% block content %}
+<h1>Licenses</h1>
+
+<a class="btn btn-add" href="{% url 'license_create' %}">➕ Add License</a>
+<br><br>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Product Key</th>
+    <th>Expiration</th>
+    <th>Licensed To Email</th>
+    <th>Licensed To Name</th>
+    <th>Manufacturer</th>
+    <th>Total</th>
+    <th>Available</th>
+    <th>Action</th>
+  </tr>
+
+  {% for l in licenses %}
+  <tr>
+    <td>{{ l.name }}</td>
+
+    <td title="{{ l.product_key }}">
+      {{ l.product_key|slice:":12" }}…
+    </td>
+
+    <td>{{ l.expiration_date }}</td>
+
+    <td>{{ l.licensed_to_email|default:"—" }}</td>
+    <td>{{ l.licensed_to_name|default:"—" }}</td>
+
+    <td>{{ l.manufacturer }}</td>
+    <td>{{ l.total_seats }}</td>
+
+    <td>
+      {% if l.available_seats > 0 %}
+        🟢 {{ l.available_seats }}
+      {% else %}
+        🔴 0
+      {% endif %}
+    </td>
+
+    <td>
+      <a class="btn btn-edit"
+         href="{% url 'license_edit' l.id %}">
+        ✏️ Edit
+      </a>
+
+      |
+      <form action="{% url 'license_delete' l.id %}"
+            method="post"
+            style="display:inline;">
+        {% csrf_token %}
+        <button type="submit"
+                class="btn btn-delete"
+                onclick="return confirm('Delete this license?')"
+                style="background:none; border:none; cursor:pointer;">
+          🗑️ Delete
+        </button>
+      </form>
+    </td>
+  </tr>
+
+  {% empty %}
+  <tr>
+    <td colspan="9" style="text-align:center;">
+      No licenses found
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Consumables{% endblock %}
+
+{% block content %}
+<h1>Consumables</h1>
+
+<a class="btn btn-add" href="{% url 'consumable_create' %}">➕ Add Consumable</a>
+<br><br>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Category</th>
+    <th>Model No</th>
+    <th>Location</th>
+    <th>Min Qty</th>
+    <th>Total</th>
+    <th>Unit Cost</th>
+    <th>Action</th>
+  </tr>
+
+  {% for c in consumables %}
+  <tr>
+    <td>{{ c.name }}</td>
+    <td>{{ c.category }}</td>
+    <td>{{ c.model_no|default:"—" }}</td>
+    <td>{{ c.location }}</td>
+
+    <td>{{ c.min_quantity }}</td>
+
+    <td>
+      {% if c.quantity > c.min_quantity %}
+        🟢 {{ c.quantity }}
+      {% else %}
+        🔴 {{ c.quantity }}
+      {% endif %}
+    </td>
+
+    <td>{{ c.unit_cost|default:"—" }}</td>
+
+    <td>
+      <a href="{% url 'consumable_edit' c.id %}">✏️</a>
+      |
+      <form method="post"
+            action="{% url 'consumable_delete' c.id %}"
+            style="display:inline;">
+        {% csrf_token %}
+        <button onclick="return confirm('Delete?')">🗑️</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% endblock %}

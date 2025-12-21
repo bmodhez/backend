@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Accessories{% endblock %}
+
+{% block content %}
+<h1>Accessories</h1>
+
+<a class="btn btn-add" href="{% url 'accessory_create' %}">➕ Add Accessory</a>
+<br><br>
+
+<table>
+  <tr>
+    <th>Image</th>
+    <th>Name</th>
+    <th>Category</th>
+    <th>Model No</th>
+    <th>Location</th>
+    <th>Min Qty</th>
+    <th>Total Qty</th>
+    <th>Action</th>
+  </tr>
+
+  {% for a in accessories %}
+  <tr>
+    <td>
+      {% if a.device_image %}
+        <img src="{{ a.device_image.url }}" width="40">
+      {% else %}
+        —
+      {% endif %}
+    </td>
+
+    <td>{{ a.name }}</td>
+    <td>{{ a.category }}</td>
+    <td>{{ a.model_no|default:"—" }}</td>
+    <td>{{ a.location }}</td>
+
+    <td>{{ a.min_quantity }}</td>
+
+    <td>
+      {% if a.quantity > a.min_quantity %}
+        🟢 {{ a.quantity }}
+      {% else %}
+        🔴 {{ a.quantity }}
+      {% endif %}
+    </td>
+
+    <td>
+      <a class="btn btn-edit"
+         href="{% url 'accessory_edit' a.id %}">✏️</a>
+
+      |
+      <form method="post"
+            action="{% url 'accessory_delete' a.id %}"
+            style="display:inline;">
+        {% csrf_token %}
+        <button class="btn btn-delete"
+                onclick="return confirm('Delete this accessory?')">
+          🗑️
+        </button>
+      </form>
+    </td>
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="8" style="text-align:center;">
+      No accessories found
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{% if license %}Edit{% else %}Create{% endif %} License{% endblock %}
+
+{% block content %}
+<h1>{% if license %}Edit{% else %}Create{% endif %} License</h1>
+
+<form method="post" class="form-card">
+  {% csrf_token %}
+
+  <label>License Name</label>
+  <input type="text"
+         name="name"
+         placeholder="License Name"
+         value="{{ license.name|default:'' }}"
+         required>
+         <br> <br>
+
+  <label>Product Key</label>
+  <input type="text"
+         name="product_key"
+         placeholder="Product Key"
+         value="{{ license.product_key|default:'' }}"
+         required>
+<br><br>
+  <label>Manufacturer</label>
+  <input type="text"
+         name="manufacturer"
+         placeholder="Manufacturer"
+         value="{{ license.manufacturer|default:'' }}"
+         required>
+<br><br>
+  <label>Licensed To Name</label>
+  <input type="text"
+         name="licensed_to_name"
+         placeholder="Licensed To Name"
+         value="{{ license.licensed_to_name|default:'' }}">
+<br><br>
+  <label>Licensed To Email</label>
+  <input type="email"
+         name="licensed_to_email"
+         placeholder="Licensed To Email"
+         value="{{ license.licensed_to_email|default:'' }}">
+<br><br>
+  <label>Total Seats</label>
+  <input type="number"
+         name="total_seats"
+         min="1"
+         placeholder="Total Seats"
+         value="{{ license.total_seats|default:'' }}"
+         required>
+<br><br>
+  <label>Available Seats</label>
+  <input type="number"
+         name="available_seats"
+         min="0"
+         placeholder="Available Seats"
+         value="{{ license.available_seats|default:'' }}"
+         required>
+<br><br>
+  <label>Expiration Date</label>
+  <input type="date"
+         name="expiration_date"
+         value="{{ license.expiration_date|date:'Y-m-d' }}"
+         required>
+<br><br>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-save">
+      💾 Save
+    </button>
+
+    <a href="{% url 'license_list' %}" class="btn btn-cancel">
+      Cancel
+    </a>
+  </div>
+</form>
+{% endblock %}

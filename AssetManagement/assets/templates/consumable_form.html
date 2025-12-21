@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Consumable{% endblock %}
+
+{% block content %}
+<h1>{% if consumable %}Edit{% else %}Create{% endif %} Consumable</h1>
+
+<form method="post">
+  {% csrf_token %}
+
+  <!-- NAME -->
+  <label>Name</label><br>
+  <input type="text" name="name"
+         value="{{ consumable.name|default:'' }}" required><br><br>
+
+  <!-- CATEGORY -->
+  <label>Category</label><br>
+  <input type="text" name="category"
+         value="{{ consumable.category|default:'' }}" required><br><br>
+
+  <!-- MODEL NO -->
+  <label>Model No</label><br>
+  <input type="text" name="model_no"
+         value="{{ consumable.model_no|default:'' }}"><br><br>
+
+  <!-- ITEM NO -->
+  <label>Item No</label><br>
+  <input type="text" name="item_no"
+         value="{{ consumable.item_no|default:'' }}"><br><br>
+
+  <!-- ORDER NUMBER -->
+  <label>Order Number</label><br>
+  <input type="text" name="order_number"
+         value="{{ consumable.order_number|default:'' }}"><br><br>
+
+  <!-- PURCHASE DATE -->
+  <label>Purchase Date</label><br>
+  <input type="date" name="purchase_date"
+         value="{{ consumable.purchase_date|date:'Y-m-d' }}"><br><br>
+
+  <!-- MIN QTY -->
+  <label>Min Quantity</label><br>
+  <input type="number" name="min_quantity"
+         value="{{ consumable.min_quantity|default:'0' }}"><br><br>
+
+  <!-- TOTAL QUANTITY -->
+  <label>Total Quantity</label><br>
+  <input type="number" name="quantity"
+         value="{{ consumable.quantity|default:'' }}" required><br><br>
+
+  <!-- UNIT COST -->
+  <label>Unit Cost</label><br>
+  <input type="number" step="0.01" name="unit_cost"
+         value="{{ consumable.unit_cost|default:'' }}"><br><br>
+
+  <!-- LOCATION -->
+  <label>Location</label><br>
+  <input type="text" name="location"
+         value="{{ consumable.location|default:'' }}" required><br><br>
+
+  <button type="submit">💾 Save</button>
+  <a href="{% url 'consumable_list' %}">Cancel</a>
+</form>
+{% endblock %}
