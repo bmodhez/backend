@@ -5,15 +5,15 @@ from django.contrib import messages
 
 def login_view(request):
     if request.method == "POST":
-        username = request.POST.get("email")
+        email = request.POST.get("email")
         password = request.POST.get("password")
 
-        user = authenticate(username=username, password=password)
+        user = authenticate(username=email, password=password)
         if user is not None:
             login(request, user)
             return redirect("dashboard")
         else:
-            messages.error(request, "Invalid username or password")
+            messages.error(request, "Invalid email or password")
 
     return render(request, "auth/login.html")
 

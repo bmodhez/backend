@@ -47,7 +47,7 @@
 
     <td>
       {% if a.assigned_to %}
-        {{ a.assigned_to.get_full_name|default:a.assigned_to.username }}
+        {{ a.assigned_to.name|default:a.assigned_to.email }}
       {% else %}
         —
       {% endif %}
